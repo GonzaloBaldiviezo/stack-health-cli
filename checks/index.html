@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Stack Health Checks</title>
+    <meta
+      name="description"
+      content="Reference guide for the health checks used by stack-health-cli."
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f3efe6;
+        --panel: #fffaf1;
+        --panel-strong: #f7f0dd;
+        --text: #1f1c18;
+        --muted: #5f584c;
+        --accent: #0e7c66;
+        --accent-strong: #0a5b4a;
+        --border: #d9cdb5;
+        --code: #f0e6d3;
+        --shadow: 0 20px 50px rgba(36, 30, 16, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        font-family: Georgia, Cambria, "Times New Roman", serif;
+        background:
+          radial-gradient(circle at top left, rgba(14, 124, 102, 0.14), transparent 28%),
+          linear-gradient(180deg, #fbf7ef 0%, var(--bg) 100%);
+        color: var(--text);
+        line-height: 1.6;
+      }
+
+      a {
+        color: var(--accent-strong);
+      }
+
+      .shell {
+        width: min(1100px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 40px 0 64px;
+      }
+
+      .hero {
+        display: grid;
+        gap: 18px;
+        padding: 40px;
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        background: linear-gradient(135deg, rgba(255, 250, 241, 0.96), rgba(247, 240, 221, 0.92));
+        box-shadow: var(--shadow);
+      }
+
+      .eyebrow {
+        margin: 0;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 0.82rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--accent-strong);
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        line-height: 1.1;
+      }
+
+      h1 {
+        font-size: clamp(2.6rem, 5vw, 4.8rem);
+        max-width: 11ch;
+      }
+
+      .lead {
+        max-width: 62ch;
+        margin: 0;
+        font-size: 1.08rem;
+        color: var(--muted);
+      }
+
+      .hero-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .hero-link {
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 14px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.66);
+        text-decoration: none;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 280px minmax(0, 1fr);
+        gap: 24px;
+        margin-top: 28px;
+      }
+
+      .nav,
+      .content section {
+        border: 1px solid var(--border);
+        background: rgba(255, 250, 241, 0.9);
+        box-shadow: var(--shadow);
+      }
+
+      .nav {
+        position: sticky;
+        top: 20px;
+        align-self: start;
+        border-radius: 24px;
+        padding: 20px;
+      }
+
+      .nav h2 {
+        font-size: 1rem;
+        margin-bottom: 14px;
+      }
+
+      .nav ol {
+        margin: 0;
+        padding-left: 18px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .nav a {
+        text-decoration: none;
+      }
+
+      .content {
+        display: grid;
+        gap: 20px;
+      }
+
+      .content section {
+        border-radius: 24px;
+        padding: 28px;
+      }
+
+      .content h2 {
+        font-size: 1.8rem;
+        margin-bottom: 14px;
+      }
+
+      .label {
+        font-weight: 700;
+      }
+
+      ul,
+      ol {
+        margin-top: 10px;
+        margin-bottom: 0;
+      }
+
+      li + li {
+        margin-top: 8px;
+      }
+
+      pre {
+        margin: 16px 0 0;
+        padding: 16px;
+        overflow: auto;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        background: var(--code);
+        font-family: "Courier New", Courier, monospace;
+        font-size: 0.95rem;
+      }
+
+      code {
+        font-family: "Courier New", Courier, monospace;
+      }
+
+      .footer {
+        margin-top: 22px;
+        padding: 18px 22px;
+        border-radius: 20px;
+        background: var(--panel-strong);
+        border: 1px solid var(--border);
+        color: var(--muted);
+      }
+
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .nav {
+          position: static;
+        }
+
+        .hero {
+          padding: 28px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <p class="eyebrow">stack-health-cli docs</p>
+        <h1>Why each health check exists</h1>
+        <p class="lead">
+          This page explains every check used by the CLI, why it matters, and what to do when
+          your score drops because of it.
+        </p>
+        <div class="hero-links">
+          <a class="hero-link" href="../">Back to repository</a>
+          <a class="hero-link" href="#next-steps">Implementation order</a>
+        </div>
+      </header>
+
+      <div class="layout">
+        <nav class="nav" aria-label="Checks navigation">
+          <h2>Checks</h2>
+          <ol>
+            <li><a href="#repository-metadata">Repository metadata</a></li>
+            <li><a href="#project-manifest">Project manifest</a></li>
+            <li><a href="#documentation">Documentation</a></li>
+            <li><a href="#automated-checks">Automated checks</a></li>
+            <li><a href="#code-quality-scripts">Code quality scripts</a></li>
+            <li><a href="#ci-readiness">CI readiness</a></li>
+            <li><a href="#next-steps">Next steps</a></li>
+          </ol>
+        </nav>
+
+        <div class="content">
+          <section id="repository-metadata">
+            <h2>Repository metadata</h2>
+            <p><span class="label">What it checks:</span> Presence of a <code>.git</code> directory.</p>
+            <p><span class="label">Why it matters:</span></p>
+            <ul>
+              <li><strong>Traceability</strong> — Git history tells you who changed what, when, and why.</li>
+              <li><strong>Collaboration</strong> — Without version control, branches and reviews disappear.</li>
+              <li><strong>Automation foundation</strong> — CI/CD depends on git as the source of truth.</li>
+              <li><strong>Debugging</strong> — Git blame and bisect are often your fastest path to root cause.</li>
+            </ul>
+            <pre><code>git init</code></pre>
+          </section>
+
+          <section id="project-manifest">
+            <h2>Project manifest</h2>
+            <p>
+              <span class="label">What it checks:</span> Presence of a dependency or build manifest such as
+              <code>package.json</code>, <code>pyproject.toml</code>, <code>go.mod</code>,
+              <code>Cargo.toml</code>, <code>pom.xml</code>, or <code>build.gradle</code>.
+            </p>
+            <p><span class="label">Why it matters:</span></p>
+            <ul>
+              <li><strong>Reproducibility</strong> — Exact dependencies and versions can be recreated.</li>
+              <li><strong>Environment consistency</strong> — CI, production, and teammates install the same setup.</li>
+              <li><strong>Audit trail</strong> — Dependency changes become reviewable and traceable.</li>
+              <li><strong>Build clarity</strong> — The manifest defines how the project is run and built.</li>
+            </ul>
+            <pre><code># Node.js
+pnpm init
+
+# Go
+go mod init github.com/user/repo</code></pre>
+          </section>
+
+          <section id="documentation">
+            <h2>Documentation</h2>
+            <p><span class="label">What it checks:</span> Presence of a README.</p>
+            <p><span class="label">Why it matters:</span></p>
+            <ul>
+              <li><strong>Onboarding</strong> — New contributors need a fast way to understand the project.</li>
+              <li><strong>Maintenance</strong> — Good docs reduce tribal knowledge and single points of failure.</li>
+              <li><strong>Credibility</strong> — A readable README signals care and maturity.</li>
+              <li><strong>Usage clarity</strong> — People do not adopt tools they cannot understand quickly.</li>
+            </ul>
+            <pre><code>README checklist
+- What the project does
+- How to install it
+- How to run it
+- How to contribute</code></pre>
+          </section>
+
+          <section id="automated-checks">
+            <h2>Automated checks</h2>
+            <p>
+              <span class="label">What it checks:</span> A <code>test</code> script or the presence of test files
+              such as <code>*.test.ts</code>, <code>*.spec.ts</code>, or <code>__tests__</code>.
+            </p>
+            <p><span class="label">Why it matters:</span></p>
+            <ul>
+              <li><strong>Reliability</strong> — Tests catch regressions before users do.</li>
+              <li><strong>Confidence</strong> — Refactors become safer when behavior is covered.</li>
+              <li><strong>Documentation</strong> — Tests act as executable examples of expected behavior.</li>
+              <li><strong>Regression prevention</strong> — Fixed bugs stay fixed.</li>
+            </ul>
+            <pre><code>{
+  "scripts": {
+    "test": "vitest run"
+  }
+}</code></pre>
+          </section>
+
+          <section id="code-quality-scripts">
+            <h2>Code quality scripts</h2>
+            <p>
+              <span class="label">What it checks:</span> Presence of <code>lint</code> or <code>typecheck</code>
+              scripts in the project manifest.
+            </p>
+            <p><span class="label">Why it matters:</span></p>
+            <ul>
+              <li><strong>Consistency</strong> — Linters make code easier to read across a team.</li>
+              <li><strong>Bug prevention</strong> — Many issues are caught before runtime.</li>
+              <li><strong>Security</strong> — Static analysis can highlight risky patterns early.</li>
+              <li><strong>Automation</strong> — CI can enforce standards before merge.</li>
+            </ul>
+            <pre><code>{
+  "scripts": {
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  }
+}</code></pre>
+          </section>
+
+          <section id="ci-readiness">
+            <h2>CI readiness</h2>
+            <p>
+              <span class="label">What it checks:</span> Presence of CI configuration such as
+              <code>.github/workflows</code>, <code>.gitlab-ci.yml</code>, or <code>azure-pipelines.yml</code>.
+            </p>
+            <p><span class="label">Why it matters:</span></p>
+            <ul>
+              <li><strong>Automated enforcement</strong> — Quality checks run on every push.</li>
+              <li><strong>Safety net</strong> — Broken code is blocked before it reaches main.</li>
+              <li><strong>Visibility</strong> — Teams can see build and test status immediately.</li>
+              <li><strong>Evidence</strong> — Deployments have a verifiable trail of what passed.</li>
+            </ul>
+            <pre><code>name: CI
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest</code></pre>
+          </section>
+
+          <section id="next-steps">
+            <h2>Next steps</h2>
+            <p>
+              If you are improving your project health, follow this order so each investment builds on
+              the previous one.
+            </p>
+            <ol>
+              <li>Start with repository metadata and project manifest.</li>
+              <li>Add a README so other people can run and understand the project.</li>
+              <li>Add automated tests.</li>
+              <li>Add linting and type checking.</li>
+              <li>Wire all of that into CI.</li>
+            </ol>
+            <div class="footer">
+              The CLI is intentionally simple right now: the score should be understandable, not magical.
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
