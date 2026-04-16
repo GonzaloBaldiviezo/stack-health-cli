@@ -7,11 +7,13 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { analyzeProject } from './analyzer.js';
+import { runNormalizedTests } from './test-execution.js';
 
 type AnalyzeOptions = {
   path: string;
   format: 'text' | 'json';
   minScore?: number;
+  runTests?: boolean;
 };
 
 const docsFilePath = fileURLToPath(new URL('../docs/checks.md', import.meta.url));
@@ -51,6 +53,7 @@ program
   .option('-p, --path <path>', 'Path to the project to analyze', cwd())
   .option('-f, --format <format>', 'Output format: text or json', 'text')
   .option('--min-score <score>', 'Fail with exit code 1 if score is below this value (0-100)', Number)
+  .option('--run-tests', 'Execute tests and include normalized runtime results', false)
   .action((options: AnalyzeOptions) => {
     const projectPath = resolve(options.path);
     const projectStats = statSync(projectPath, { throwIfNoEntry: false });
@@ -94,6 +97,7 @@ program
     const openFindings = results.filter((result) => !result.passed);
     const colorizeScore = scoreColor(score);
     const thresholdMet = typeof minScore === 'number' ? score >= minScore : true;
+    const testRun = options.runTests ? runNormalizedTests(projectPath) : null;
 
     if (requestedFormat === 'json') {
       console.log(
@@ -113,6 +117,7 @@ program
               recommendation: result.recommendation ?? null,
               docLink: result.docAnchor ? getCheckDocLink(result.docAnchor) : null
             })),
+            testRun,
             recommendations: openFindings.map((finding) => finding.recommendation)
           },
           null,
@@ -153,6 +158,32 @@ program
 
       for (const finding of openFindings) {
         console.log(`- ${finding.recommendation}`);
+      }
+    }
+
+    if (testRun) {
+      console.log('');
+      console.log(chalk.bold('Test execution'));
+      console.log(`Runner: ${testRun.runner ?? 'unknown'} (${testRun.stack})`);
+      if (testRun.command) {
+        console.log(`Command: ${testRun.command}`);
+      }
+
+      if (!testRun.executed) {
+        console.log(chalk.yellow(`Status: skipped (${testRun.details ?? 'No supported runner detected'})`));
+      } else {
+        const testStatus = testRun.success ? chalk.green('PASS') : chalk.red('FAIL');
+        console.log(`Status: ${testStatus} (exit code: ${testRun.exitCode ?? 'n/a'})`);
+
+        if (typeof testRun.total === 'number') {
+          console.log(
+            `Summary: total=${testRun.total} passed=${testRun.passed ?? 0} failed=${testRun.failed ?? 0} skipped=${testRun.skipped ?? 0}`
+          );
+        }
+
+        if (typeof testRun.durationMs === 'number') {
+          console.log(`Duration: ${testRun.durationMs}ms`);
+        }
       }
     }
 
