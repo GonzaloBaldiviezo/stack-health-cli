@@ -41,6 +41,18 @@ pnpm lint
 pnpm test
 ```
 
+## CI
+
+GitHub Actions workflow is available at `.github/workflows/ci.yml`.
+
+It runs on push and pull request and executes:
+
+- `pnpm typecheck`
+- `pnpm lint`
+- `pnpm test`
+- `pnpm build`
+- `pnpm dev analyze --min-score 90`
+
 ## New command options
 
 - `--format text|json`: choose human output (`text`) or machine-readable output (`json`).
