@@ -75,9 +75,15 @@ Next improvements
 
 ## Why each check matters
 
-Each result includes a link to `docs/checks.md` that explains:
+Each result includes a link to the public checks documentation page that explains:
 - What the check does and why it matters
 - Real consequences of failing each check
 - Step-by-step fixes for each item
 
 This way, the CLI doesn't just score you—it educates you.
+
+Docs URL:
+
+```text
+https://gonzalobaldiviezo.github.io/stack-health-cli/checks/
+```
