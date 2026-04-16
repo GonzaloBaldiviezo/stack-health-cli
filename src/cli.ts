@@ -24,6 +24,15 @@ type AnalyzeOptions = {
 
 const docsFilePath = fileURLToPath(new URL('../docs/checks.md', import.meta.url));
 const docsFileUri = pathToFileURL(docsFilePath).href;
+const remoteDocsBaseUrl = 'https://gonzalobaldiviezo.github.io/stack-health-cli/checks/';
+
+function getCheckDocLink(anchor: string): string {
+  if (remoteDocsBaseUrl.startsWith('https://')) {
+    return `${remoteDocsBaseUrl}${anchor}`;
+  }
+
+  return `${docsFileUri}${anchor}`;
+}
 
 const program = new Command();
 
@@ -254,7 +263,7 @@ program
               points: result.points,
               detail: result.detail,
               recommendation: result.recommendation ?? null,
-              docLink: result.docAnchor ? `${docsFileUri}${result.docAnchor}` : null
+              docLink: result.docAnchor ? getCheckDocLink(result.docAnchor) : null
             })),
             recommendations: openFindings.map((finding) => finding.recommendation)
           },
@@ -286,7 +295,7 @@ program
       console.log(`${status} ${result.label} (${result.points} pts)`);
       console.log(`  ${result.detail}`);
       if (result.docAnchor) {
-        console.log(`  ${chalk.dim(`Learn more: ${docsFileUri}${result.docAnchor}`)}`);
+        console.log(`  ${chalk.dim(`Learn more: ${getCheckDocLink(result.docAnchor)}`)}`);
       }
     }
 
