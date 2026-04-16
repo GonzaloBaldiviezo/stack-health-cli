@@ -1,5 +1,7 @@
 # stack-health-cli
 
+[![CI](https://github.com/GonzaloBaldiviezo/stack-health-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/GonzaloBaldiviezo/stack-health-cli/actions/workflows/ci.yml)
+
 Basic MVP for a CLI that analyzes a local project and returns a simple health result.
 
 ## What it does
@@ -23,6 +25,7 @@ pnpm dev analyze
 pnpm dev analyze --path .
 pnpm dev analyze --format json
 pnpm dev analyze --min-score 70
+pnpm dev analyze --run-tests
 ```
 
 ## Build and run
@@ -57,6 +60,20 @@ It runs on push and pull request and executes:
 
 - `--format text|json`: choose human output (`text`) or machine-readable output (`json`).
 - `--min-score <0-100>`: if score is lower than this value, command exits with code `1`.
+- `--run-tests`: runs detected test command (Node or Python) and reports normalized results.
+
+`--run-tests` currently supports:
+
+- Node projects using `vitest`
+- Python projects using `pytest`
+
+When JUnit output is available, report includes a normalized summary:
+
+- `total`
+- `passed`
+- `failed`
+- `skipped`
+- `durationMs`
 
 Examples:
 
@@ -66,6 +83,9 @@ pnpm dev analyze --format json
 
 # Fail pipeline when score is below 70
 pnpm dev analyze --min-score 70
+
+# Include test execution details in the report
+pnpm dev analyze --run-tests
 ```
 
 ## Expected output
