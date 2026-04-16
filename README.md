@@ -33,6 +33,14 @@ pnpm start analyze
 pnpm start analyze --format json --min-score 70
 ```
 
+## Quality checks
+
+```bash
+pnpm typecheck
+pnpm lint
+pnpm test
+```
+
 ## New command options
 
 - `--format text|json`: choose human output (`text`) or machine-readable output (`json`).
