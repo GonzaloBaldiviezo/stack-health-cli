@@ -16,6 +16,8 @@ type AnalyzeOptions = {
   runTests?: boolean;
 };
 
+const FAILED_TESTS_PENALTY = 20;
+
 const docsFilePath = fileURLToPath(new URL('../docs/checks.md', import.meta.url));
 const docsFileUri = pathToFileURL(docsFilePath).href;
 const remoteDocsBaseUrl = 'https://gonzalobaldiviezo.github.io/stack-health-cli/checks/';
@@ -93,11 +95,14 @@ program
     }
 
     const results = analyzeProject(projectPath);
-    const score = results.reduce((sum, result) => sum + (result.passed ? result.points : 0), 0);
+    const baseScore = results.reduce((sum, result) => sum + (result.passed ? result.points : 0), 0);
     const openFindings = results.filter((result) => !result.passed);
+    const testRun = options.runTests ? runNormalizedTests(projectPath) : null;
+    const testPenalty =
+      testRun && testRun.executed && testRun.success === false ? FAILED_TESTS_PENALTY : 0;
+    const score = Math.max(baseScore - testPenalty, 0);
     const colorizeScore = scoreColor(score);
     const thresholdMet = typeof minScore === 'number' ? score >= minScore : true;
-    const testRun = options.runTests ? runNormalizedTests(projectPath) : null;
 
     if (requestedFormat === 'json') {
       console.log(
@@ -105,6 +110,10 @@ program
           {
             ok: true,
             projectPath,
+            baseScore,
+            penalties: {
+              failedTests: testPenalty
+            },
             score,
             maxScore: 100,
             minScore: minScore ?? null,
@@ -135,6 +144,13 @@ program
     console.log(chalk.green('CLI working'));
     console.log(`Analyzing project at: ${chalk.cyan(projectPath)}`);
     console.log(`${chalk.bold('Health score:')} ${colorizeScore(`${score}/100`)}`);
+
+    if (testPenalty > 0) {
+      console.log(
+        `${chalk.bold('Score penalty:')} ${chalk.red(`-${testPenalty}`)} (tests executed but failing)`
+      );
+      console.log(`${chalk.dim(`Base score before penalty: ${baseScore}/100`)}`);
+    }
 
     if (typeof minScore === 'number') {
       const thresholdStatus = thresholdMet ? chalk.green('PASS') : chalk.red('FAIL');
