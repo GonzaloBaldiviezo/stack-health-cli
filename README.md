@@ -64,8 +64,10 @@ It runs on push and pull request and executes:
 
 `--run-tests` currently supports:
 
-- Node projects using `vitest`
-- Python projects using `pytest`
+- Node projects using `vitest` (full metrics)
+- Node projects using `jest` (full metrics)
+- Python projects using `pytest` (full metrics)
+- Python projects using `unittest` (exit-code only)
 
 When JUnit output is available, report includes a normalized summary:
 
@@ -74,6 +76,12 @@ When JUnit output is available, report includes a normalized summary:
 - `failed`
 - `skipped`
 - `durationMs`
+
+If a runner cannot produce structured output, the tool falls back to `success/failure` and `exitCode` only.
+
+When `--run-tests` is enabled and tests fail, the CLI applies a score penalty:
+
+- `-20` points from the base score
 
 Examples:
 
