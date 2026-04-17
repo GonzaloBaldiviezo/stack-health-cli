@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseJUnitXml } from '../src/test-execution.js';
+import { parseJestJson, parseJUnitXml } from '../src/test-execution.js';
 
 describe('parseJUnitXml', () => {
   it('parses a testsuites summary when testsuite tags are absent', () => {
@@ -35,6 +35,31 @@ describe('parseJUnitXml', () => {
 
   it('returns null for non-JUnit content', () => {
     const summary = parseJUnitXml('<root></root>');
+    expect(summary).toBeNull();
+  });
+});
+
+describe('parseJestJson', () => {
+  it('parses basic totals from jest JSON output', () => {
+    const json = JSON.stringify({
+      numTotalTests: 12,
+      numPassedTests: 9,
+      numFailedTests: 2,
+      numPendingTests: 1
+    });
+
+    const summary = parseJestJson(json);
+
+    expect(summary).toEqual({
+      total: 12,
+      failed: 2,
+      skipped: 1,
+      durationMs: null
+    });
+  });
+
+  it('returns null for invalid JSON', () => {
+    const summary = parseJestJson('not json');
     expect(summary).toBeNull();
   });
 });
