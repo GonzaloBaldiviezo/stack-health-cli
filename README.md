@@ -80,6 +80,7 @@ pnpm dev analyze [options]
 
 | Option | Description | Example |
 |--------|-------------|---------|
+| `-h, --help` | Display help information | `pnpm dev analyze --help` |
 | `--path <path>` | Directory to analyze | `--path .` |
 | `--format <format>` | Output format (text or json) | `--format json` |
 | `--min-score <number>` | Minimum score (0-100) | `--min-score 70` |
