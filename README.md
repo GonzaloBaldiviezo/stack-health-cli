@@ -2,41 +2,126 @@
 
 [![CI](https://github.com/GonzaloBaldiviezo/stack-health-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/GonzaloBaldiviezo/stack-health-cli/actions/workflows/ci.yml)
 
-Basic MVP for a CLI that analyzes a local project and returns a simple health result.
+**Stack Health CLI** is a tool that analyzes the health of your local project and generates a report with a health score based on best practices.
 
-## What it does
-
-This first version does three things:
-
-- exposes a CLI command
-- inspects a local folder for basic project health signals
-- calculates a simple score from those checks
-
-## Install
+## Installation
 
 ```bash
 pnpm install
 ```
 
-## Run in development
+## Main commands
+
+The main command is `analyze` which inspects a project and generates a report:
 
 ```bash
 pnpm dev analyze
+```
+
+## Using the analyze command
+
+### Basic format
+
+Analyzes the current directory by default:
+
+```bash
+pnpm dev analyze
+```
+
+### Analyze a specific directory
+
+Use the `--path` option to analyze a project in another directory:
+
+```bash
+# Analyze root directory
 pnpm dev analyze --path .
+
+# Analyze a project in another location
+pnpm dev analyze --path ../my-project
+pnpm dev analyze --path /absolute/path/to/project
+```
+
+### Output formats
+
+By default shows a human-readable report. Use `--format` to get JSON:
+
+```bash
+# Human-readable report (default)
+pnpm dev analyze
+
+# JSON output for CI/scripts
 pnpm dev analyze --format json
+```
+
+### Setting thresholds
+
+Define a minimum score for the command to fail if not met:
+
+```bash
+# Fail if score is below 70
 pnpm dev analyze --min-score 70
+```
+
+### Run project tests
+
+Also analyzes project tests and reports results:
+
+```bash
 pnpm dev analyze --run-tests
 ```
 
-## Build and run
+## Complete analyze command options
+
+```bash
+pnpm dev analyze [options]
+```
+
+**Available options:**
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--path <path>` | Directory to analyze | `--path .` |
+| `--format <format>` | Output format (text or json) | `--format json` |
+| `--min-score <number>` | Minimum score (0-100) | `--min-score 70` |
+| `--run-tests` | Run project tests | `-` |
+
+## Common usage examples
+
+### 1. Quick project analysis
+```bash
+pnpm dev analyze
+```
+
+### 2. Generate report for CI/CD
+```bash
+pnpm dev analyze --format json
+```
+
+### 3. Fail if quality is low
+```bash
+pnpm dev analyze --min-score 70
+```
+
+### 4. Analyze and run tests
+```bash
+pnpm dev analyze --run-tests
+```
+
+### 5. Combine multiple options
+```bash
+pnpm dev analyze --path ./src --format json --min-score 80 --run-tests
+```
+
+## Build and production mode
+
+To use the compiled version:
 
 ```bash
 pnpm build
 pnpm start analyze
-pnpm start analyze --format json --min-score 70
 ```
 
-## Quality checks
+## Quality commands
 
 ```bash
 pnpm typecheck
@@ -44,94 +129,33 @@ pnpm lint
 pnpm test
 ```
 
-## CI
+## How the score works
 
-GitHub Actions workflow is available at `.github/workflows/ci.yml`.
+The tool evaluates several aspects of your project:
 
-It runs on push and pull request and executes:
+| Check | Points |
+|-------|--------|
+| Git repository present | 10 |
+| Project manifest (package.json, etc) | 20 |
+| README.md present | 15 |
+| Test files detected | 30 |
+| Lint/typecheck scripts | 15 |
+| CI configuration detected | 10 |
+| Penalty for failed tests | -20 |
 
-- `pnpm typecheck`
-- `pnpm lint`
-- `pnpm test`
-- `pnpm build`
-- `pnpm dev analyze --min-score 90`
+## What the results mean
 
-## New command options
+The health score helps identify areas for improvement:
 
-- `--format text|json`: choose human output (`text`) or machine-readable output (`json`).
-- `--min-score <0-100>`: if score is lower than this value, command exits with code `1`.
-- `--run-tests`: runs detected test command (Node or Python) and reports normalized results.
+- **90-100**: Excellent - Your project follows all best practices
+- **70-89**: Good - Some areas can be improved
+- **50-69**: Needs work - Consider the recommendations
+- **0-49**: High risk - Your project needs urgent attention
 
-`--run-tests` currently supports:
+## Check documentation
 
-- Node projects using `vitest` (full metrics)
-- Node projects using `jest` (full metrics)
-- Python projects using `pytest` (full metrics)
-- Python projects using `unittest` (exit-code only)
+For understanding what each check means and how to improve:
 
-When JUnit output is available, report includes a normalized summary:
-
-- `total`
-- `passed`
-- `failed`
-- `skipped`
-- `durationMs`
-
-If a runner cannot produce structured output, the tool falls back to `success/failure` and `exitCode` only.
-
-When `--run-tests` is enabled and tests fail, the CLI applies a score penalty:
-
-- `-20` points from the base score
-
-Examples:
-
-```bash
-# JSON for CI or scripts
-pnpm dev analyze --format json
-
-# Fail pipeline when score is below 70
-pnpm dev analyze --min-score 70
-
-# Include test execution details in the report
-pnpm dev analyze --run-tests
 ```
-
-## Expected output
-
-```text
-CLI working
-Analyzing project at: /absolute/path/to/project
-Health score: 55/100
-
-PASS Repository metadata (10 pts)
-	Git repository detected.
-FAIL Automated checks (30 pts)
-	No test script or test files detected.
-
-Next improvements
-- Add at least one automated test or a test script.
-```
-
-## Current scoring rules
-
-- Git repository present: 10 points
-- Project manifest present: 20 points
-- README present: 15 points
-- Tests detected: 30 points
-- Lint or typecheck script detected: 15 points
-- CI configuration detected: 10 points
-
-## Why each check matters
-
-Each result includes a link to the public checks documentation page that explains:
-- What the check does and why it matters
-- Real consequences of failing each check
-- Step-by-step fixes for each item
-
-This way, the CLI doesn't just score you—it educates you.
-
-Docs URL:
-
-```text
 https://gonzalobaldiviezo.github.io/stack-health-cli/checks/
 ```
